@@ -1,0 +1,25 @@
+{
+  "format": "POSITION_COLOR_TEX_LIGHTMAP",
+  "mode": "QUADS",
+  "bufferSize": "TRANSIENT",
+  "sort": false,
+  "affectsCrumbling": true,
+  "outline": true,
+  "layers": [
+    {
+      "type": "veil:shader",
+      "name": "mirror:mirror"
+    },
+    {
+      "type": "minecraft:lightmap"
+    },
+    {
+      "type": "minecraft:layering",
+      "mode": "polygon_offset"
+    },
+    {
+      "type": "minecraft:transparency",
+      "mode": "translucent"
+    }
+  ]
+}

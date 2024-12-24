@@ -3,6 +3,16 @@ plugins {
     id 'net.neoforged.moddev'
 }
 
+dependencies {
+    jarJar(implementation("foundry.veil:veil-neoforge-${project.minecraft_version}")) {
+        exclude group: "maven.modrinth"
+        version {
+            strictly "[${project.veil_version},)"
+            prefer "${project.veil_version}"
+        }
+    }
+}
+
 neoForge {
     version = neoforge_version
     // Automatically enable neoforge AccessTransformers if the file exists
