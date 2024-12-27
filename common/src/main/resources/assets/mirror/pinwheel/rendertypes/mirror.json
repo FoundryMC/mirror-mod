@@ -1,11 +1,15 @@
 {
-  "format": "POSITION_COLOR_TEX_LIGHTMAP",
+  "format": "POSITION_TEX_COLOR_NORMAL",
   "mode": "QUADS",
   "bufferSize": "TRANSIENT",
   "sort": false,
   "affectsCrumbling": true,
   "outline": true,
   "layers": [
+    {
+      "type": "minecraft:texture",
+      "texture": "%s"
+    },
     {
       "type": "veil:shader",
       "name": "mirror:mirror"
