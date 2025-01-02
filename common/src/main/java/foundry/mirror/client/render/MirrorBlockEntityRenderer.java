@@ -5,17 +5,11 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import foundry.mirror.block.MirrorBlock;
 import foundry.mirror.blockentity.MirrorBlockEntity;
-import foundry.mirror.mixin.client.GameRendererAccessor;
 import foundry.veil.api.client.render.CullFrustum;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
-import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.VeilRenderer;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
@@ -25,11 +19,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Matrix4fc;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -45,12 +37,6 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
 
     @Override
     public void render(MirrorBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        FramebufferManager framebufferManager = VeilRenderSystem.renderer().getFramebufferManager();
-        AdvancedFbo fbo = framebufferManager.getFramebuffer(MirrorRenderer.MIRROR_FBO);
-        if (fbo == null) {
-            return;
-        }
-
         BlockPos pos = blockEntity.getBlockPos();
         Direction facing = blockEntity.getBlockState().getValue(MirrorBlock.FACING);
 
@@ -60,14 +46,18 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
             return;
         }
 
+        Camera camera = this.blockEntityRenderDispatcher.camera;
+        Vec3 cameraPos = camera.getPosition();
+        double distance = Math.sqrt(cameraPos.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+        int viewDistance = this.getViewDistance();
+
         mirror.setRenderedPos(pos.immutable());
         if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
             if (!mirror.hasRendered(0)) {
-                Camera camera = this.blockEntityRenderDispatcher.camera;
-                Vec3 cameraPos = camera.getPosition();
                 Vector3f up = camera.getUpVector();
                 Vector3f look = camera.getLookVector();
-                MirrorRenderer.renderMirror(mirror, 0, mirror.getPos(), mirror.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, true, false);
+                int lod = (int) Mth.clamp(distance / viewDistance * MirrorRenderer.MAX_LOD, 0, MirrorRenderer.MAX_LOD);
+                MirrorRenderer.renderMirror(mirror, lod, 0, mirror.getPos(), mirror.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, true, false);
                 mirror.setRendered(0);
             }
         } else if (MirrorRenderer.getRenderLayer() < MirrorRenderer.MAX_LAYERS && renderMirror != null) {
@@ -84,20 +74,22 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
         poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
         poseStack.translate(-0.5, -0.5, -0.5);
 
+        float alpha = (float) (1.0 - Mth.clamp((distance - viewDistance + 8) / 8.0, 0.0, 1.0)) * 0.7F;
+
         Vector3fc normal = mirror.getNormal();
         Matrix4f pose = poseStack.last().pose();
         VertexConsumer builder = bufferSource.getBuffer(renderType);
-        builder.addVertex(pose, 0, 0, 0.125F).setUv(1.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, 0.7F).setNormal(normal.x(), normal.y(), normal.z());
-        builder.addVertex(pose, 1, 0, 0.125F).setUv(0.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, 0.7F).setNormal(normal.x(), normal.y(), normal.z());
-        builder.addVertex(pose, 1, 1, 0.125F).setUv(0.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, 0.7F).setNormal(normal.x(), normal.y(), normal.z());
-        builder.addVertex(pose, 0, 1, 0.125F).setUv(1.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, 0.7F).setNormal(normal.x(), normal.y(), normal.z());
+        builder.addVertex(pose, 0, 0, 0.125F).setUv(1.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
+        builder.addVertex(pose, 1, 0, 0.125F).setUv(0.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
+        builder.addVertex(pose, 1, 1, 0.125F).setUv(0.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
+        builder.addVertex(pose, 0, 1, 0.125F).setUv(1.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
 
         poseStack.popPose();
     }
 
     @Override
     public int getViewDistance() {
-        return 64;
+        return 54;
     }
 
     @Override

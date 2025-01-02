@@ -10,6 +10,7 @@ import foundry.mirror.mixin.client.GameRendererAccessor;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -37,17 +38,21 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.lwjgl.opengl.GL11C.*;
 import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 
 public class MirrorRenderer {
 
-    public static final ResourceLocation MIRROR_RENDER_TYPE = MirrorMod.path("mirror");
-    public static final ResourceLocation MIRROR_FBO = MirrorMod.path("mirror");
-
+    public static final int MAX_LOD = 2;
     public static final int MIPMAP_LEVELS = 4;
     public static final int MAX_LAYERS = 1;
+
+    public static final ResourceLocation MIRROR_RENDER_TYPE = MirrorMod.path("mirror");
+    public static final ResourceLocation[] MIRROR_FBO = IntStream.rangeClosed(0, MAX_LOD+1)
+            .mapToObj(i -> MirrorMod.path("mirror" + i))
+            .toArray(ResourceLocation[]::new);
 
     private static final Matrix4f RENDER_MODELVIEW = new Matrix4f();
     private static final Matrix4f RENDER_PROJECTION = new Matrix4f();
@@ -75,8 +80,8 @@ public class MirrorRenderer {
         return TEXTURES.computeIfAbsent(3L << 62 | (leftHand ? 1 : 0), unused -> new MirrorTexture());
     }
 
-    public static void renderMirror(MirrorTexture mirror, int layer, Vector3fc mirrorPos, Vector3fc mirrorNormal, double x, double y, double z, Vector3fc up, Vector3fc dir, float renderDistance, boolean render, boolean recurse) {
-        AdvancedFbo fbo = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(MIRROR_FBO);
+    public static void renderMirror(MirrorTexture mirror, int lod, int layer, Vector3fc mirrorPos, Vector3fc mirrorNormal, double x, double y, double z, Vector3fc up, Vector3fc dir, float renderDistance, boolean render, boolean recurse) {
+        AdvancedFbo fbo = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(MIRROR_FBO[lod]);
         if (fbo == null) {
             return;
         }
@@ -105,7 +110,7 @@ public class MirrorRenderer {
 
             renderMirror = mirror;
             renderLayer = layer + 1;
-            VeilLevelPerspectiveRenderer.render(fbo, RENDER_MODELVIEW, RENDER_PROJECTION, renderPos, look, renderDistance, client.getTimer());
+            VeilLevelPerspectiveRenderer.render(fbo, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer());
             renderLayer = layer;
             renderMirror = null;
             mirror.copy(fbo, layer);
@@ -134,7 +139,7 @@ public class MirrorRenderer {
             return;
         }
         for (MirrorTexture child : mirror.visibleMirrors) {
-            renderMirror(child, layer + 1, child.pos, child.normal, renderPos.x, renderPos.y, renderPos.z, mirrorUp, mirrorDir, renderDistance, true, false);
+            renderMirror(child, lod,layer + 1, child.pos, child.normal, renderPos.x, renderPos.y, renderPos.z, mirrorUp, mirrorDir, renderDistance, true, false);
         }
     }
 
@@ -193,7 +198,7 @@ public class MirrorRenderer {
 
         for (MirrorTexture mirror : TEXTURES.values()) {
             if (mirror.visibleMirrors != null) {
-                renderMirror(mirror, 0, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorBlockEntityRenderer.RENDER_DISTANCE, false, true);
+                renderMirror(mirror, 2,0, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorBlockEntityRenderer.RENDER_DISTANCE, false, true);
                 mirror.reset();
             }
         }

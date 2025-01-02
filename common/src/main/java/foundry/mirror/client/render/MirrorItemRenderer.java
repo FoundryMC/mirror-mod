@@ -8,24 +8,23 @@ import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
 import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
+import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.joml.*;
-
-import java.lang.Math;
+import org.joml.Matrix4f;
+import org.joml.Quaternionfc;
+import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 public class MirrorItemRenderer {
 
@@ -46,12 +45,6 @@ public class MirrorItemRenderer {
         }
 
         boolean leftHand = mode == ItemDisplayContext.FIRST_PERSON_LEFT_HAND;
-        FramebufferManager framebufferManager = VeilRenderSystem.renderer().getFramebufferManager();
-        AdvancedFbo fbo = framebufferManager.getFramebuffer(MirrorRenderer.MIRROR_FBO);
-        if (fbo == null) {
-            return;
-        }
-
         MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(leftHand);
         MirrorRenderer.MirrorTexture renderMirror = MirrorRenderer.getRenderMirror();
         if (mirror == renderMirror) {
@@ -64,8 +57,8 @@ public class MirrorItemRenderer {
         }
         Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
         Vec3 cameraPos = camera.getPosition();
-        Vector3f up = new Vector3f(0,1,0);
-        Vector3f look = new Vector3f(0,0,1);
+        Vector3f up = new Vector3f(0, 1, 0);
+        Vector3f look = new Vector3f(0, 0, 1);
         Quaternionfc orientation = camera.rotation();
         Vector3d pos = new Vector3d(cameraPos.x, cameraPos.y, cameraPos.z).add(orientation.transform(new Vector3f(leftHand ? -0.2F : 0.2F, 0.0F, -1.5F)));
 
@@ -81,7 +74,7 @@ public class MirrorItemRenderer {
         look.rotate(orientation);
         poseStack.popPose();
 
-        MirrorRenderer.renderMirror(mirror, 0, new Vector3f(), new Vector3f(), pos.x, pos.y, pos.z, up, look, 2.0F, true, false);
+        MirrorRenderer.renderMirror(mirror, 0, 0, new Vector3f(), new Vector3f(), pos.x, pos.y, pos.z, up, look, 2.0F, true, false);
 
         Matrix4f pose = poseStack.last().pose();
         VertexConsumer builder = bufferSource.getBuffer(renderType);
