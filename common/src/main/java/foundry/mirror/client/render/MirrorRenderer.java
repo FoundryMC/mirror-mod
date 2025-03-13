@@ -10,7 +10,6 @@ import foundry.mirror.mixin.client.GameRendererAccessor;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -45,6 +44,7 @@ import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 
 public class MirrorRenderer {
 
+    public static final float RENDER_DISTANCE = 4.0F;
     public static final int MAX_LOD = 2;
     public static final int MIPMAP_LEVELS = 4;
     public static final int MAX_LAYERS = 1;
@@ -110,7 +110,7 @@ public class MirrorRenderer {
 
             renderMirror = mirror;
             renderLayer = layer + 1;
-            VeilLevelPerspectiveRenderer.render(fbo, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer());
+            VeilLevelPerspectiveRenderer.render(fbo, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer(), false);
             renderLayer = layer;
             renderMirror = null;
             mirror.copy(fbo, layer);
@@ -198,7 +198,7 @@ public class MirrorRenderer {
 
         for (MirrorTexture mirror : TEXTURES.values()) {
             if (mirror.visibleMirrors != null) {
-                renderMirror(mirror, 2,0, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorBlockEntityRenderer.RENDER_DISTANCE, false, true);
+                renderMirror(mirror, 2,0, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, false, true);
                 mirror.reset();
             }
         }

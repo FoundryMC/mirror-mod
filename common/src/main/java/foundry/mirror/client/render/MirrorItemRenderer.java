@@ -5,10 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import foundry.mirror.MirrorMod;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
-import foundry.veil.api.client.render.framebuffer.FramebufferManager;
 import foundry.veil.api.client.render.rendertype.VeilRenderType;
-import foundry.veil.impl.client.render.pipeline.VeilFirstPersonRenderer;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -28,7 +25,8 @@ import org.joml.Vector3f;
 
 public class MirrorItemRenderer {
 
-    public static final ModelResourceLocation MODEL_LOCATION = ModelResourceLocation.inventory(MirrorMod.path("item/mirror_model"));
+    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(MirrorMod.path("item/mirror_model"), "standalone");
+    public static final boolean RENDER_REFLECTION = false;
 
     public static void render(ItemStack stack, ItemDisplayContext mode, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
         RenderType rendertype = ItemBlockRenderTypes.getRenderType(stack, true);
@@ -40,7 +38,7 @@ public class MirrorItemRenderer {
         BakedModel override = model.getOverrides().resolve(model, stack, null, null, 0);
         itemRenderer.renderModelLists(override == null ? modelManager.getMissingModel() : override, stack, packedLight, packedOverlay, poseStack, vertexconsumer);
 
-        if (!mode.firstPerson() || VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
+        if (!RENDER_REFLECTION || !mode.firstPerson() || VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
             return;
         }
 

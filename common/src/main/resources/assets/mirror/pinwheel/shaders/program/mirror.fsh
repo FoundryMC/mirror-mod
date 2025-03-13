@@ -1,5 +1,4 @@
 #include veil:fog
-#include veil:deferred_utils
 
 uniform sampler2D Sampler0;
 
@@ -19,6 +18,7 @@ out vec4 fragColor;
 
 void main() {
     vec2 uv = vec2(1.0 - gl_FragCoord.x, gl_FragCoord.y) / ScreenSize.xy;
+    // #veil:albedo
     vec4 color = texture(Sampler0, uv) * vertexColor;
     fragColor = linear_fog(color, vertexDistance, FogStart, FogEnd, FogColor);
 }
