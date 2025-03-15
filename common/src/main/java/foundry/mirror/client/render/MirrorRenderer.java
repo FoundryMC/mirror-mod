@@ -10,6 +10,7 @@ import foundry.mirror.mixin.client.GameRendererAccessor;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.compat.IrisCompat;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -63,13 +64,14 @@ public class MirrorRenderer {
 
     private static final ObjectSet<BlockPos> RENDER_POSITIONS = new ObjectArraySet<>();
     private static final Long2ObjectMap<MirrorTexture> TEXTURES = new Long2ObjectArrayMap<>();
+    private static final Quaternionf CAMERA_ORIENTATION = new Quaternionf();
 
     private static MirrorTexture renderMirror;
     private static int renderLayer;
 
     private static long getKey(BlockPos pos, Direction face, float mirrorOffset) {
         Vec3i normal = face.getNormal();
-        return (long) face.getAxis().ordinal() << 62 | (long)(mirrorOffset * 16.0) << 57 | (0x1FFFFFFFFFFFFFFL & (((long) pos.getX() * normal.getX() + (long) pos.getY() * normal.getY() + (long) pos.getZ() * normal.getZ())));
+        return (long) face.getAxis().ordinal() << 62 | (long) (mirrorOffset * 16.0) << 57 | (0x1FFFFFFFFFFFFFFL & (((long) pos.getX() * normal.getX() + (long) pos.getY() * normal.getY() + (long) pos.getZ() * normal.getZ())));
     }
 
     public static MirrorTexture getTexture(BlockPos pos, Direction facing, float mirrorOffset) {
@@ -81,6 +83,10 @@ public class MirrorRenderer {
     }
 
     public static void renderMirror(MirrorTexture mirror, int lod, int layer, float mirrorOffset, Vector3fc mirrorPos, Vector3fc mirrorNormal, double cameraX, double cameraY, double cameraZ, Vector3fc up, Vector3fc dir, float renderDistance, boolean render, boolean recurse) {
+        if (IrisCompat.isLoaded() && IrisCompat.INSTANCE.areShadersLoaded()) {
+            return;
+        }
+
         AdvancedFbo fbo = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(MIRROR_FBO[lod]);
         if (fbo == null) {
             return;
@@ -88,7 +94,7 @@ public class MirrorRenderer {
 
         Minecraft client = Minecraft.getInstance();
 
-        Vector3d renderPos = new Vector3d(mirrorPos.x() + 0.5 - mirrorNormal.x() * (0.5 - mirrorOffset-0.01), mirrorPos.y() + 0.5 - mirrorNormal.y() * (0.5 - mirrorOffset-0.01), mirrorPos.z() + 0.5 - mirrorNormal.z() * (0.5 - mirrorOffset-0.01));
+        Vector3d renderPos = new Vector3d(mirrorPos.x() + 0.5 - mirrorNormal.x() * (0.5 - mirrorOffset - 0.01), mirrorPos.y() + 0.5 - mirrorNormal.y() * (0.5 - mirrorOffset - 0.01), mirrorPos.z() + 0.5 - mirrorNormal.z() * (0.5 - mirrorOffset - 0.01));
         Vector3f offset = new Vector3f((float) (cameraX - renderPos.x), (float) (cameraY - renderPos.y), (float) (cameraZ - renderPos.z));
 
         Window window = client.getWindow();
@@ -110,7 +116,9 @@ public class MirrorRenderer {
 
             renderMirror = mirror;
             renderLayer = layer + 1;
-            VeilLevelPerspectiveRenderer.render(fbo, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer(), false);
+            Quaternionf rotation = Minecraft.getInstance().gameRenderer.getMainCamera().rotation();
+            CAMERA_ORIENTATION.set(rotation.x, -rotation.y, -rotation.z, rotation.w);
+            VeilLevelPerspectiveRenderer.render(fbo, null, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer(), false);
             renderLayer = layer;
             renderMirror = null;
             mirror.copy(fbo, layer);
@@ -236,6 +244,10 @@ public class MirrorRenderer {
 
     public static boolean isRenderingMirror() {
         return renderMirror != null;
+    }
+
+    public static Quaternionfc getCameraOrientation() {
+        return CAMERA_ORIENTATION;
     }
 
     public static int getRenderLayer() {

@@ -21,7 +21,7 @@ public class ParticleEngineMixin {
     public void saveOrientation(LightTexture lightTexture, Camera camera, float partialTick, CallbackInfo ci) {
         if (MirrorRenderer.isRenderingMirror()) {
             this.mirror$orientation.set(camera.rotation());
-            camera.rotation().rotateLocalY((float) Math.PI);
+            camera.rotation().set(MirrorRenderer.getCameraOrientation());
         }
     }
 
