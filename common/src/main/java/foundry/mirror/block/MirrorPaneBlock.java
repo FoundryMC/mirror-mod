@@ -22,7 +22,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.Arrays;
 
-public class MirrorPaneBlock extends MirrorBlock implements SimpleWaterloggedBlock {
+public class MirrorPaneBlock extends AbstractMirrorBlock implements SimpleWaterloggedBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;

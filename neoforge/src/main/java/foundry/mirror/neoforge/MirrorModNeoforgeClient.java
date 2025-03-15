@@ -30,7 +30,7 @@ public class MirrorModNeoforgeClient {
             public @NotNull BlockEntityWithoutLevelRenderer getCustomRenderer() {
                 return renderer;
             }
-        }, MirrorBlocks.MIRROR.get().asItem());
+        }, MirrorBlocks.MIRROR_PANE.get().asItem());
     }
 
     private void onModelLoad(ModelEvent.RegisterAdditional event) {

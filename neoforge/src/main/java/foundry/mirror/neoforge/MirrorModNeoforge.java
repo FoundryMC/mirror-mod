@@ -28,6 +28,6 @@ public class MirrorModNeoforge {
     }
 
     private void fillCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        event.insertAfter(new ItemStack(Items.TINTED_GLASS), new ItemStack(MirrorBlocks.MIRROR.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        event.insertAfter(new ItemStack(Items.TINTED_GLASS), new ItemStack(MirrorBlocks.MIRROR_PANE.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
     }
 }
