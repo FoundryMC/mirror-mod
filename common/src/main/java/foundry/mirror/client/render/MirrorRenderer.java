@@ -50,7 +50,7 @@ public class MirrorRenderer {
     public static final int MAX_LAYERS = 1;
 
     public static final ResourceLocation MIRROR_RENDER_TYPE = MirrorMod.path("mirror");
-    public static final ResourceLocation[] MIRROR_FBO = IntStream.rangeClosed(0, MAX_LOD+1)
+    public static final ResourceLocation[] MIRROR_FBO = IntStream.rangeClosed(0, MAX_LOD + 1)
             .mapToObj(i -> MirrorMod.path("mirror" + i))
             .toArray(ResourceLocation[]::new);
 
@@ -67,20 +67,20 @@ public class MirrorRenderer {
     private static MirrorTexture renderMirror;
     private static int renderLayer;
 
-    private static long getKey(BlockPos pos, Direction face) {
+    private static long getKey(BlockPos pos, Direction face, float mirrorOffset) {
         Vec3i normal = face.getNormal();
-        return (long) face.getAxis().ordinal() << 62 | (0x3FFFFFFFFFFFFFFFL & (((long) pos.getX() * normal.getX() + (long) pos.getY() * normal.getY() + (long) pos.getZ() * normal.getZ())));
+        return (long) face.getAxis().ordinal() << 62 | (long)(mirrorOffset * 16.0) << 57 | (0x1FFFFFFFFFFFFFFL & (((long) pos.getX() * normal.getX() + (long) pos.getY() * normal.getY() + (long) pos.getZ() * normal.getZ())));
     }
 
-    public static MirrorTexture getTexture(BlockPos pos, Direction facing) {
-        return TEXTURES.computeIfAbsent(getKey(pos, facing), unused -> new MirrorTexture(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), new Vector3f(facing.getStepX(), facing.getStepY(), facing.getStepZ())));
+    public static MirrorTexture getTexture(BlockPos pos, Direction facing, float mirrorOffset) {
+        return TEXTURES.computeIfAbsent(getKey(pos, facing, mirrorOffset), unused -> new MirrorTexture(new Vector3f(pos.getX(), pos.getY(), pos.getZ()), new Vector3f(facing.getStepX(), facing.getStepY(), facing.getStepZ()), mirrorOffset));
     }
 
     public static MirrorTexture getTexture(boolean leftHand) {
         return TEXTURES.computeIfAbsent(3L << 62 | (leftHand ? 1 : 0), unused -> new MirrorTexture());
     }
 
-    public static void renderMirror(MirrorTexture mirror, int lod, int layer, Vector3fc mirrorPos, Vector3fc mirrorNormal, double x, double y, double z, Vector3fc up, Vector3fc dir, float renderDistance, boolean render, boolean recurse) {
+    public static void renderMirror(MirrorTexture mirror, int lod, int layer, float mirrorOffset, Vector3fc mirrorPos, Vector3fc mirrorNormal, double cameraX, double cameraY, double cameraZ, Vector3fc up, Vector3fc dir, float renderDistance, boolean render, boolean recurse) {
         AdvancedFbo fbo = VeilRenderSystem.renderer().getFramebufferManager().getFramebuffer(MIRROR_FBO[lod]);
         if (fbo == null) {
             return;
@@ -88,8 +88,8 @@ public class MirrorRenderer {
 
         Minecraft client = Minecraft.getInstance();
 
-        Vector3d renderPos = new Vector3d(mirrorPos.x() + 0.5 - mirrorNormal.x() * 0.36, mirrorPos.y() + 0.5 - mirrorNormal.y() * 0.36, mirrorPos.z() + 0.5 - mirrorNormal.z() * 0.36);
-        Vector3f offset = new Vector3f((float) (x - renderPos.x), (float) (y - renderPos.y), (float) (z - renderPos.z));
+        Vector3d renderPos = new Vector3d(mirrorPos.x() + 0.5 - mirrorNormal.x() * (0.5 - mirrorOffset-0.01), mirrorPos.y() + 0.5 - mirrorNormal.y() * (0.5 - mirrorOffset-0.01), mirrorPos.z() + 0.5 - mirrorNormal.z() * (0.5 - mirrorOffset-0.01));
+        Vector3f offset = new Vector3f((float) (cameraX - renderPos.x), (float) (cameraY - renderPos.y), (float) (cameraZ - renderPos.z));
 
         Window window = client.getWindow();
         float aspect = (float) window.getWidth() / window.getHeight();
@@ -139,7 +139,7 @@ public class MirrorRenderer {
             return;
         }
         for (MirrorTexture child : mirror.visibleMirrors) {
-            renderMirror(child, lod,layer + 1, child.pos, child.normal, renderPos.x, renderPos.y, renderPos.z, mirrorUp, mirrorDir, renderDistance, true, false);
+            renderMirror(child, lod, layer + 1, mirrorOffset, child.pos, child.normal, renderPos.x, renderPos.y, renderPos.z, mirrorUp, mirrorDir, renderDistance, true, false);
         }
     }
 
@@ -198,7 +198,7 @@ public class MirrorRenderer {
 
         for (MirrorTexture mirror : TEXTURES.values()) {
             if (mirror.visibleMirrors != null) {
-                renderMirror(mirror, 2,0, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, false, true);
+                renderMirror(mirror, 2, 0, mirror.mirrorOffset, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, false, true);
                 mirror.reset();
             }
         }
@@ -249,6 +249,7 @@ public class MirrorRenderer {
         private final TextureWrapper[] textures;
         private final Vector3f pos;
         private final Vector3f normal;
+        private final float mirrorOffset;
         private final Set<MirrorTexture> visibleMirrors;
 
         private int width;
@@ -260,6 +261,7 @@ public class MirrorRenderer {
             this.textures = new TextureWrapper[1];
             this.pos = null;
             this.normal = null;
+            this.mirrorOffset = 0;
             this.visibleMirrors = null;
             this.width = -1;
             this.height = -1;
@@ -270,12 +272,13 @@ public class MirrorRenderer {
             Minecraft.getInstance().getTextureManager().register(texture.getName(), texture);
         }
 
-        private MirrorTexture(Vector3f pos, Vector3f normal) {
+        private MirrorTexture(Vector3f pos, Vector3f normal, float mirrorOffset) {
             this.positions = new ObjectArraySet<>();
             this.renderedLayers = new BitSet(MAX_LAYERS);
             this.textures = new TextureWrapper[MAX_LAYERS];
             this.pos = pos;
             this.normal = normal;
+            this.mirrorOffset = mirrorOffset;
             this.visibleMirrors = new HashSet<>();
             this.width = -1;
             this.height = -1;
@@ -340,6 +343,10 @@ public class MirrorRenderer {
 
         public Vector3fc getNormal() {
             return this.normal;
+        }
+
+        public float getMirrorOffset() {
+            return this.mirrorOffset;
         }
 
         public void setRenderedPos(BlockPos pos) {

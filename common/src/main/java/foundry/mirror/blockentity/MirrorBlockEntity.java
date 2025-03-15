@@ -10,9 +10,4 @@ public class MirrorBlockEntity extends BlockEntity {
     public MirrorBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MirrorBlocks.MIRROR_BE.get(), blockPos, blockState);
     }
-
-//    @Override
-//    public Packet<ClientGamePacketListener> getUpdatePacket() {
-//        return ClientboundBlockEntityDataPacket.create(this);
-//    }
 }

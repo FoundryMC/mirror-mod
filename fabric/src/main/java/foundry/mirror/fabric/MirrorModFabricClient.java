@@ -1,7 +1,7 @@
 package foundry.mirror.fabric;
 
 import foundry.mirror.MirrorModClient;
-import foundry.mirror.client.render.MirrorPaneBlockEntityRenderer;
+import foundry.mirror.client.render.MirrorBlockEntityRenderer;
 import foundry.mirror.client.render.MirrorItemRenderer;
 import foundry.mirror.client.render.MirrorRenderer;
 import foundry.mirror.registry.MirrorBlocks;
@@ -25,7 +25,7 @@ public class MirrorModFabricClient implements ClientModInitializer {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
             entries.addAfter(Items.BEACON, new ItemStack(MirrorBlocks.MIRROR.get()));
         });
-        BlockEntityRenderers.register(MirrorBlocks.MIRROR_BE.get(), MirrorPaneBlockEntityRenderer::new);
+        BlockEntityRenderers.register(MirrorBlocks.MIRROR_BE.get(), MirrorBlockEntityRenderer::new);
         BuiltinItemRendererRegistry.INSTANCE.register(MirrorBlocks.MIRROR.get(), MirrorItemRenderer::render);
     }
 }

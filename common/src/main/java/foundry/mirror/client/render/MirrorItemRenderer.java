@@ -25,7 +25,7 @@ import org.joml.Vector3f;
 
 public class MirrorItemRenderer {
 
-    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(MirrorMod.path("item/mirror_model"), "standalone");
+    public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation(MirrorMod.path("item/mirror_pane_model"), "standalone");
     public static final boolean RENDER_REFLECTION = false;
 
     public static void render(ItemStack stack, ItemDisplayContext mode, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
@@ -72,7 +72,7 @@ public class MirrorItemRenderer {
         look.rotate(orientation);
         poseStack.popPose();
 
-        MirrorRenderer.renderMirror(mirror, 0, 0, new Vector3f(), new Vector3f(), pos.x, pos.y, pos.z, up, look, 2.0F, true, false);
+        MirrorRenderer.renderMirror(mirror, 0, 0, 0, new Vector3f(), new Vector3f(), pos.x, pos.y, pos.z, up, look, 2.0F, true, false);
 
         Matrix4f pose = poseStack.last().pose();
         VertexConsumer builder = bufferSource.getBuffer(renderType);

@@ -1,18 +1,18 @@
 {
   "variants": {
     "facing=north": {
-      "model": "mirror:block/mirror"
+      "model": "mirror:block/mirror_pane"
     },
     "facing=east": {
-      "model": "mirror:block/mirror",
+      "model": "mirror:block/mirror_pane",
       "y": 90
     },
     "facing=south": {
-      "model": "mirror:block/mirror",
+      "model": "mirror:block/mirror_pane",
       "y": 180
     },
     "facing=west": {
-      "model": "mirror:block/mirror",
+      "model": "mirror:block/mirror_pane",
       "y": 270
     }
   }

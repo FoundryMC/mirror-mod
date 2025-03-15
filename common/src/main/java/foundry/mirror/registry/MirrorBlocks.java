@@ -2,6 +2,7 @@ package foundry.mirror.registry;
 
 import foundry.mirror.MirrorMod;
 import foundry.mirror.block.MirrorBlock;
+import foundry.mirror.block.MirrorPaneBlock;
 import foundry.mirror.blockentity.MirrorBlockEntity;
 import foundry.veil.platform.registry.RegistrationProvider;
 import foundry.veil.platform.registry.RegistryObject;
@@ -21,12 +22,12 @@ public class MirrorBlocks {
     public static final RegistrationProvider<Block> BLOCK_REGISTRY = RegistrationProvider.get(BuiltInRegistries.BLOCK, MirrorMod.MOD_ID);
     public static final RegistrationProvider<BlockEntityType<?>> BLOCK_ENTITY_REGISTRY = RegistrationProvider.get(BuiltInRegistries.BLOCK_ENTITY_TYPE, MirrorMod.MOD_ID);
 
-    public static final RegistryObject<MirrorBlock> MIRROR = register("mirror", () -> new MirrorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK)
+    public static final RegistryObject<MirrorBlock> MIRROR = register("mirror_pane", () -> new MirrorPaneBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.BEDROCK)
                     .noOcclusion()
                     .isRedstoneConductor((state, level, pos) -> false)
                     .isSuffocating((state, level, pos) -> false)),
             new Item.Properties());
-    public static final RegistryObject<BlockEntityType<MirrorBlockEntity>> MIRROR_BE = registerBlockEntity("mirror", ()->BlockEntityType.Builder.of(MirrorBlockEntity::new, MIRROR.get()));
+    public static final RegistryObject<BlockEntityType<MirrorBlockEntity>> MIRROR_BE = registerBlockEntity("mirror", () -> BlockEntityType.Builder.of(MirrorBlockEntity::new, MIRROR.get()));
 
     public static void bootstrap() {
     }

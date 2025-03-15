@@ -2,7 +2,7 @@ package foundry.mirror.neoforge;
 
 
 import foundry.mirror.MirrorMod;
-import foundry.mirror.client.render.MirrorPaneBlockEntityRenderer;
+import foundry.mirror.client.render.MirrorBlockEntityRenderer;
 import foundry.mirror.registry.MirrorBlocks;
 import foundry.mirror.registry.MirrorItems;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +19,6 @@ public class MirrorModNeoforge {
     }
 
     private void registerBlockEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(MirrorBlocks.MIRROR_BE.get(), MirrorPaneBlockEntityRenderer::new);
+        event.registerBlockEntityRenderer(MirrorBlocks.MIRROR_BE.get(), MirrorBlockEntityRenderer::new);
     }
 }
