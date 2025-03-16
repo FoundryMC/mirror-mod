@@ -1,5 +1,5 @@
 {
-  "parent": "mirror:item/mirror_pane_model",
+  "parent": "builtin/entity",
   "display": {
     "gui": {
       "rotation": [30, 215, 0],
