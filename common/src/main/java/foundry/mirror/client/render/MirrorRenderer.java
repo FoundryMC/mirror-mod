@@ -48,7 +48,7 @@ import static org.lwjgl.opengl.GL30C.glGenerateMipmap;
 public class MirrorRenderer {
 
     public static final float RENDER_DISTANCE = 4.0F;
-    public static final int MAX_LOD = 2;
+    public static final int MAX_LOD = 1;
     public static final int MIPMAP_LEVELS = 4;
     public static final int MAX_LAYERS = 1;
 
@@ -223,7 +223,7 @@ public class MirrorRenderer {
 
         for (MirrorTexture mirror : TEXTURES.values()) {
             if (mirror.visibleMirrors != null) {
-                renderMirror(mirror, 2, 0, mirror.mirrorOffset, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, false, true);
+                renderMirror(mirror, 1, 0, mirror.mirrorOffset, mirror.pos, mirror.normal, cameraPos.x, cameraPos.y, cameraPos.z, up, look, RENDER_DISTANCE, false, true);
                 mirror.reset();
             }
         }

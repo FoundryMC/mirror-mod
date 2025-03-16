@@ -161,7 +161,7 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
 
     @Override
     public int getViewDistance() {
-        return 54;
+        return 22;
     }
 
     @Override
