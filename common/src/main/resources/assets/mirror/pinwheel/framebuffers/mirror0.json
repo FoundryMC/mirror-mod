@@ -1,5 +1,7 @@
 {
   "depth": true,
   "autoClear": false,
-  "format": "RGB8"
+  "format": "RGB8",
+  "width": "math.ceil(q.screen_width / 2)",
+  "height": "math.ceil(q.screen_height / 2)"
 }

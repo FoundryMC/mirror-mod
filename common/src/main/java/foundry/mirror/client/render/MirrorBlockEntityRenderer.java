@@ -73,7 +73,7 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
                 if (!mirror.hasRendered(0)) {
                     Vector3f up = camera.getUpVector();
                     Vector3f look = camera.getLookVector();
-                    int lod = (int) Mth.clamp(distance / viewDistance * MirrorRenderer.MAX_LOD, 0, MirrorRenderer.MAX_LOD);
+                    int lod = (int) Mth.clamp(distance / viewDistance / 2.0 * MirrorRenderer.MAX_LOD, 0, MirrorRenderer.MAX_LOD);
                     MirrorRenderer.renderMirror(mirror, lod, 0, mirrorOffset, mirror.getPos(), mirror.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorRenderer.RENDER_DISTANCE, true, false);
                     mirror.setRendered(0);
                 }
@@ -117,7 +117,7 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
                     continue;
                 }
 
-                if (dot(pos, facing.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z) >= 0) {
+                if (dot(pos, facing.getOpposite().getNormal(), cameraPos.x, cameraPos.y, cameraPos.z) <= 0) {
                     continue;
                 }
 
@@ -165,7 +165,7 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
     }
 
     @Override
-    public boolean shouldRender(MirrorBlockEntity blockEntity, Vec3 vec3) {
+    public boolean shouldRender(MirrorBlockEntity blockEntity, Vec3 cameraPos) {
         if (MirrorRenderer.getRenderLayer() >= MirrorRenderer.MAX_LAYERS) {
             return false;
         }
@@ -177,14 +177,22 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
 
         BlockPos pos = blockEntity.getBlockPos();
         int viewDistance = this.getViewDistance();
-        if (vec3.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) >= viewDistance * viewDistance) {
+        if (cameraPos.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) >= viewDistance * viewDistance) {
             return false;
         }
 
+        Direction facing;
         if (state.hasProperty(BlockStateProperties.FACING)) {
-            Direction facing = state.getValue(BlockStateProperties.FACING);
+            facing = state.getValue(BlockStateProperties.FACING);
+        } else if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+            facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        } else {
+            facing = null;
+        }
+
+        if (facing != null) {
             Vec3i normal = facing.getNormal();
-            if (dot(pos, normal, vec3.x, vec3.y, vec3.z) >= 0) {
+            if (dot(pos, normal, cameraPos.x, cameraPos.y, cameraPos.z) >= 0) {
                 return false;
             }
         }

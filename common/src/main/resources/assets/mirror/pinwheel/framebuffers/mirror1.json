@@ -2,6 +2,6 @@
   "depth": true,
   "autoClear": false,
   "format": "RGB8",
-  "width": "math.ceil(q.screen_width / 2)",
-  "height": "math.ceil(q.screen_height / 2)"
+  "width": "math.ceil(q.screen_width / 4)",
+  "height": "math.ceil(q.screen_height / 4)"
 }

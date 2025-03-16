@@ -31,7 +31,7 @@
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
-    "veil": "*",
+    "veil": ">=${veil_version}",
     "java": ">=${java_version}"
   }
 }

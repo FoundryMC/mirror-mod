@@ -13,6 +13,6 @@ public class MirrorModFabric implements ModInitializer {
     public void onInitialize() {
         MirrorMod.init();
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.addAfter(Items.TINTED_GLASS, MirrorBlocks.MIRROR.get(), MirrorBlocks.MIRROR_PANE.get()));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> entries.addAfter(Items.BEACON, MirrorBlocks.MIRROR.get(), MirrorBlocks.MIRROR_PANE.get()));
     }
 }

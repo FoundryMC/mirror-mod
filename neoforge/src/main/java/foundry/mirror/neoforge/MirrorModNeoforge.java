@@ -6,6 +6,7 @@ import foundry.mirror.client.render.MirrorBlockEntityRenderer;
 import foundry.mirror.registry.MirrorBlocks;
 import foundry.mirror.registry.MirrorItems;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
@@ -28,6 +29,10 @@ public class MirrorModNeoforge {
     }
 
     private void fillCreativeTab(BuildCreativeModeTabContentsEvent event) {
-        event.insertAfter(new ItemStack(Items.TINTED_GLASS), new ItemStack(MirrorBlocks.MIRROR_PANE.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        if (event.getTabKey().equals(CreativeModeTabs.FUNCTIONAL_BLOCKS)) {
+            ItemStack insert = new ItemStack(Items.BEACON);
+            event.insertAfter(insert, new ItemStack(MirrorBlocks.MIRROR_PANE.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+            event.insertAfter(insert, new ItemStack(MirrorBlocks.MIRROR.get()), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+        }
     }
 }

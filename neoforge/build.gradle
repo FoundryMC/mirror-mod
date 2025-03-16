@@ -3,7 +3,19 @@ plugins {
     id 'net.neoforged.moddev'
 }
 
+repositories {
+    maven {
+        url = "https://maven.su5ed.dev/releases"
+    }
+}
+
 dependencies {
+    runtimeOnly "maven.modrinth:sodium:mc1.21.1-0.6.9-neoforge"
+//    implementation "maven.modrinth:iris:1.8.8+1.21.1-neoforge"
+
+    // Allows sodium compat to compile properly
+    runtimeOnly "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
+
     jarJar(implementation("foundry.veil:veil-neoforge-${project.minecraft_version}")) {
         exclude group: "maven.modrinth"
         version {

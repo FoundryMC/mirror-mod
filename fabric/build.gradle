@@ -11,7 +11,7 @@ dependencies {
     }
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-//    modImplementation "maven.modrinth:sodium:mc1.21.1-0.6.9-fabric"
+    modImplementation "maven.modrinth:sodium:mc1.21.1-0.6.9-fabric"
 //    modImplementation "maven.modrinth:iris:1.8.8+1.21.1-fabric"
 
 //    modRuntimeOnly "maven.modrinth:cameratweaks:1.7.0-1.21.1"

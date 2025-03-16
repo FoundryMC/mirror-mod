@@ -2,7 +2,6 @@ package foundry.mirror.client.render;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import foundry.mirror.MirrorMod;
@@ -16,6 +15,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -32,6 +32,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.joml.*;
 import org.lwjgl.system.NativeResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.Math;
 import java.util.BitSet;
@@ -54,6 +56,8 @@ public class MirrorRenderer {
     public static final ResourceLocation[] MIRROR_FBO = IntStream.rangeClosed(0, MAX_LOD + 1)
             .mapToObj(i -> MirrorMod.path("mirror" + i))
             .toArray(ResourceLocation[]::new);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MirrorRenderer.class);
 
     private static final Matrix4f RENDER_MODELVIEW = new Matrix4f();
     private static final Matrix4f RENDER_PROJECTION = new Matrix4f();
@@ -97,8 +101,7 @@ public class MirrorRenderer {
         Vector3d renderPos = new Vector3d(mirrorPos.x() + 0.5 - mirrorNormal.x() * (0.5 - mirrorOffset - 0.01), mirrorPos.y() + 0.5 - mirrorNormal.y() * (0.5 - mirrorOffset - 0.01), mirrorPos.z() + 0.5 - mirrorNormal.z() * (0.5 - mirrorOffset - 0.01));
         Vector3f offset = new Vector3f((float) (cameraX - renderPos.x), (float) (cameraY - renderPos.y), (float) (cameraZ - renderPos.z));
 
-        Window window = client.getWindow();
-        float aspect = (float) window.getWidth() / window.getHeight();
+        float aspect = (float) fbo.getWidth() / fbo.getHeight();
         float fov = RenderSystem.getProjectionMatrix().perspectiveFov();
         RENDER_PROJECTION.setPerspective(fov, aspect, 0.3F, renderDistance * 64);
         RENDER_PROJECTION.mul(applyInverseBob());
@@ -116,9 +119,23 @@ public class MirrorRenderer {
 
             renderMirror = mirror;
             renderLayer = layer + 1;
+
             Quaternionf rotation = Minecraft.getInstance().gameRenderer.getMainCamera().rotation();
             CAMERA_ORIENTATION.set(rotation.x, -rotation.y, -rotation.z, rotation.w);
-            VeilLevelPerspectiveRenderer.render(fbo, null, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer(), false);
+            if (mirrorNormal.maxComponent() == 1) {
+                CAMERA_ORIENTATION.rotateLocalZ((float) Math.PI);
+            } else if (mirrorNormal.maxComponent() == 2) {
+                CAMERA_ORIENTATION.rotateLocalY((float) Math.PI);
+            }
+
+            try {
+                VeilLevelPerspectiveRenderer.render(fbo, null, RENDER_MODELVIEW, RENDER_OBLIQUE_PROJECTION, renderPos, look, renderDistance, client.getTimer(), false);
+            } catch (ReportedException e) {
+                // Let crash reports go through
+                throw e;
+            } catch (Throwable t) {
+                LOGGER.error("Error drawing mirror at: {}", mirror.pos, t);
+            }
             renderLayer = layer;
             renderMirror = null;
             mirror.copy(fbo, layer);
