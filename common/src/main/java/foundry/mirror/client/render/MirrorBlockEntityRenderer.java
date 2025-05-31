@@ -26,34 +26,33 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
 public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBlockEntity> {
 
     private final BlockEntityRenderDispatcher blockEntityRenderDispatcher;
 
-    public MirrorBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+    public MirrorBlockEntityRenderer(final BlockEntityRendererProvider.Context context) {
         this.blockEntityRenderDispatcher = context.getBlockEntityRenderDispatcher();
     }
 
     @Override
-    public void render(MirrorBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
-        BlockState state = blockEntity.getBlockState();
-        if (!(state.getBlock() instanceof AbstractMirrorBlock mirrorBlock)) {
+    public void render(final MirrorBlockEntity blockEntity, final float partialTick, final PoseStack poseStack, final MultiBufferSource bufferSource, final int packedLight, final int packedOverlay) {
+        final BlockState state = blockEntity.getBlockState();
+        if (!(state.getBlock() instanceof final AbstractMirrorBlock mirrorBlock)) {
             return;
         }
 
-        BlockPos pos = blockEntity.getBlockPos();
-        Camera camera = this.blockEntityRenderDispatcher.camera;
-        Vec3 cameraPos = camera.getPosition();
-        double distance = Math.sqrt(cameraPos.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
-        int viewDistance = this.getViewDistance();
+        final BlockPos pos = blockEntity.getBlockPos();
+        final Camera camera = this.blockEntityRenderDispatcher.camera;
+        final Vec3 cameraPos = camera.getPosition();
+        final double distance = Math.sqrt(cameraPos.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+        final int viewDistance = this.getViewDistance();
 
         if (state.is(MirrorBlocks.MIRROR_PANE.get())) {
-            float mirrorOffset = mirrorBlock.getMirrorOffset(state);
+            final float mirrorOffset = mirrorBlock.getMirrorOffset(state);
 
-            Direction facing;
+            final Direction facing;
             if (state.hasProperty(BlockStateProperties.FACING)) {
                 facing = state.getValue(BlockStateProperties.FACING);
             } else if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
@@ -62,26 +61,15 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
                 facing = Direction.NORTH;
             }
 
-            MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, mirrorOffset);
-            MirrorRenderer.MirrorTexture renderMirror = MirrorRenderer.getRenderMirror();
+            final MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, mirrorOffset);
+            final MirrorRenderer.MirrorTexture renderMirror = MirrorRenderer.getRenderMirror();
             if (mirror == renderMirror) {
                 return;
             }
 
-            mirror.setRenderedPos(pos.immutable());
-            if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
-                if (!mirror.hasRendered(0)) {
-                    Vector3f up = camera.getUpVector();
-                    Vector3f look = camera.getLookVector();
-                    int lod = (int) Mth.clamp(distance / viewDistance / 2.0 * MirrorRenderer.MAX_LOD, 0, MirrorRenderer.MAX_LOD);
-                    MirrorRenderer.renderMirror(mirror, lod, 0, mirrorOffset, mirror.getPos(), mirror.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorRenderer.RENDER_DISTANCE, true, false);
-                    mirror.setRendered(0);
-                }
-            } else if (MirrorRenderer.getRenderLayer() < MirrorRenderer.MAX_LAYERS && renderMirror != null) {
-                renderMirror.addRecursive(mirror);
-            }
+            mirror.setRenderedPos(pos);
 
-            RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture(MirrorRenderer.getRenderLayer()));
+            final RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture());
             if (renderType == null) {
                 return;
             }
@@ -91,11 +79,11 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
             poseStack.mulPose(Axis.YN.rotationDegrees(facing.toYRot()));
             poseStack.translate(-0.5, -0.5, -0.5);
 
-            float alpha = (float) (1.0 - Mth.clamp((distance - viewDistance + 8) / 8.0, 0.0, 1.0)) * 0.7F;
+            final float alpha = (float) (1.0 - Mth.clamp((distance - viewDistance + 8) / 8.0, 0.0, 1.0)) * 0.7F;
 
-            Vector3fc normal = mirror.getNormal();
-            Matrix4f pose = poseStack.last().pose();
-            VertexConsumer builder = bufferSource.getBuffer(renderType);
+            final Vector3fc normal = mirror.getNormal();
+            final Matrix4f pose = poseStack.last().pose();
+            final VertexConsumer builder = bufferSource.getBuffer(renderType);
             builder.addVertex(pose, 0, 0, mirrorOffset).setUv(1.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
             builder.addVertex(pose, 1, 0, mirrorOffset).setUv(0.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
             builder.addVertex(pose, 1, 1, mirrorOffset).setUv(0.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
@@ -103,52 +91,37 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
 
             poseStack.popPose();
         } else if (state.is(MirrorBlocks.MIRROR.get())) {
-            BlockPos.MutableBlockPos offset = new BlockPos.MutableBlockPos();
-            Level level = blockEntity.getLevel();
+            final BlockPos.MutableBlockPos offset = new BlockPos.MutableBlockPos();
+            final Level level = blockEntity.getLevel();
 
-            for (Direction facing : Direction.values()) {
-                MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, 1);
-                MirrorRenderer.MirrorTexture renderMirror = MirrorRenderer.getRenderMirror();
-                if (mirror == renderMirror) {
-                    continue;
-                }
-
+            for (final Direction facing : Direction.values()) {
                 if (level != null && !Block.shouldRenderFace(state, level, pos, facing, offset.setWithOffset(pos, facing))) {
                     continue;
                 }
 
-                if (dot(pos, facing.getOpposite().getNormal(), cameraPos.x, cameraPos.y, cameraPos.z) <= 0) {
+                final float dot = dot(pos, facing.getOpposite().getNormal(), cameraPos.x, cameraPos.y, cameraPos.z);
+                if (dot <= 0) {
                     continue;
                 }
 
-                mirror.setRenderedPos(pos.immutable());
-                if (!VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
-                    if (!mirror.hasRendered(0)) {
-                        Vector3f up = camera.getUpVector();
-                        Vector3f look = camera.getLookVector();
-                        int lod = (int) Mth.clamp(distance / viewDistance * MirrorRenderer.MAX_LOD, 0, MirrorRenderer.MAX_LOD);
-                        MirrorRenderer.renderMirror(mirror, lod, 0, 1, mirror.getPos(), mirror.getNormal(), cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorRenderer.RENDER_DISTANCE, true, false);
-                        mirror.setRendered(0);
-                    }
-                } else if (MirrorRenderer.getRenderLayer() < MirrorRenderer.MAX_LAYERS && renderMirror != null) {
-                    renderMirror.addRecursive(mirror);
-                }
-
-                RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture(MirrorRenderer.getRenderLayer()));
+                final MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, 1);
+                final RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture());
                 if (renderType == null) {
                     return;
                 }
+
+                mirror.setRenderedPos(pos);
 
                 poseStack.pushPose();
                 poseStack.translate(0.5, 0.5, 0.5);
                 poseStack.mulPose(facing.getRotation());
                 poseStack.translate(-0.5, -0.5, -0.5);
 
-                float alpha = (float) (1.0 - Mth.clamp((distance - viewDistance + 8) / 8.0, 0.0, 1.0)) * 0.7F;
+                final float alpha = (float) (1.0 - Mth.clamp((distance - viewDistance + 8) / 8.0, 0.0, 1.0)) * 0.7F;
 
-                Vector3fc normal = mirror.getNormal();
-                Matrix4f pose = poseStack.last().pose();
-                VertexConsumer builder = bufferSource.getBuffer(renderType);
+                final Vector3fc normal = mirror.getNormal();
+                final Matrix4f pose = poseStack.last().pose();
+                final VertexConsumer builder = bufferSource.getBuffer(renderType);
                 builder.addVertex(pose, 0, 1, 0).setUv(1.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
                 builder.addVertex(pose, 0, 1, 1).setUv(0.0F, 0.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
                 builder.addVertex(pose, 1, 1, 1).setUv(0.0F, 1.0F).setColor(0.9F, 0.9F, 0.9F, alpha).setNormal(normal.x(), normal.y(), normal.z());
@@ -165,23 +138,23 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
     }
 
     @Override
-    public boolean shouldRender(MirrorBlockEntity blockEntity, Vec3 cameraPos) {
-        if (MirrorRenderer.getRenderLayer() >= MirrorRenderer.MAX_LAYERS) {
+    public boolean shouldRender(final MirrorBlockEntity blockEntity, final Vec3 cameraPos) {
+        if (VeilLevelPerspectiveRenderer.isRenderingPerspective()) {
             return false;
         }
 
-        BlockState state = blockEntity.getBlockState();
-        if (!(state.getBlock() instanceof AbstractMirrorBlock mirrorBlock)) {
+        final BlockState state = blockEntity.getBlockState();
+        if (!(state.getBlock() instanceof final AbstractMirrorBlock mirrorBlock)) {
             return false;
         }
 
-        BlockPos pos = blockEntity.getBlockPos();
-        int viewDistance = this.getViewDistance();
+        final BlockPos pos = blockEntity.getBlockPos();
+        final int viewDistance = this.getViewDistance();
         if (cameraPos.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) >= viewDistance * viewDistance) {
             return false;
         }
 
-        Direction facing;
+        final Direction facing;
         if (state.hasProperty(BlockStateProperties.FACING)) {
             facing = state.getValue(BlockStateProperties.FACING);
         } else if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
@@ -191,13 +164,13 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
         }
 
         if (facing != null) {
-            Vec3i normal = facing.getNormal();
+            final Vec3i normal = facing.getNormal();
             if (dot(pos, normal, cameraPos.x, cameraPos.y, cameraPos.z) >= 0) {
                 return false;
             }
         }
 
-        AABB box = mirrorBlock.getBoundingBox(state);
+        final AABB box = mirrorBlock.getBoundingBox(state);
         return VeilRenderSystem.getCullingFrustum().testAab(
                 pos.getX() + box.minX,
                 pos.getY() + box.minY,
@@ -207,7 +180,11 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
                 pos.getZ() + box.maxZ);
     }
 
-    private static float dot(BlockPos pos, Vec3i normal, double x, double y, double z) {
-        return (float) ((pos.getX() + 0.5 - normal.getX() * 0.5 - x) * normal.getX() + (pos.getY() + 0.5 - normal.getY() * 0.5 - y) * normal.getY() + (pos.getZ() + 0.5 - normal.getZ() * 0.5 - z) * normal.getZ());
+    private static float dot(final BlockPos pos, final Vec3i normal, final double x, final double y, final double z) {
+        final float dx = (float) (pos.getX() + 0.5 - normal.getX() * 0.5 - x);
+        final float dy = (float) (pos.getY() + 0.5 - normal.getY() * 0.5 - y);
+        final float dz = (float) (pos.getZ() + 0.5 - normal.getZ() * 0.5 - z);
+        final float length = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
+        return (dx * normal.getX() + dy * normal.getY() + dz * normal.getZ()) / length;
     }
 }

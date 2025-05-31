@@ -18,7 +18,7 @@ public class ParticleEngineMixin {
     private final Quaternionf mirror$orientation = new Quaternionf();
 
     @Inject(method = "render", at = @At("HEAD"))
-    public void saveOrientation(LightTexture lightTexture, Camera camera, float partialTick, CallbackInfo ci) {
+    public void saveOrientation(final LightTexture lightTexture, final Camera camera, final float partialTick, final CallbackInfo ci) {
         if (MirrorRenderer.isRenderingMirror()) {
             this.mirror$orientation.set(camera.rotation());
             camera.rotation().set(MirrorRenderer.getCameraOrientation());
@@ -26,7 +26,7 @@ public class ParticleEngineMixin {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    public void clearOrientation(LightTexture lightTexture, Camera camera, float partialTick, CallbackInfo ci) {
+    public void clearOrientation(final LightTexture lightTexture, final Camera camera, final float partialTick, final CallbackInfo ci) {
         if (MirrorRenderer.isRenderingMirror()) {
             camera.rotation().set(this.mirror$orientation);
         }

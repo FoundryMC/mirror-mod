@@ -11,7 +11,7 @@ import net.minecraft.world.phys.AABB;
 
 public abstract class AbstractMirrorBlock extends Block implements EntityBlock {
 
-    public AbstractMirrorBlock(Properties properties) {
+    public AbstractMirrorBlock(final Properties properties) {
         super(properties);
     }
 
@@ -20,12 +20,12 @@ public abstract class AbstractMirrorBlock extends Block implements EntityBlock {
     public abstract float getMirrorOffset(BlockState state);
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
         return new MirrorBlockEntity(pos, state);
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    public boolean propagatesSkylightDown(final BlockState blockState, final BlockGetter blockGetter, final BlockPos blockPos) {
         return blockState.getFluidState().isEmpty();
     }
 }

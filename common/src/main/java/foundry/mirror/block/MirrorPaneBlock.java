@@ -35,38 +35,38 @@ public class MirrorPaneBlock extends AbstractMirrorBlock implements SimpleWaterl
     };
     public static final AABB[] BOUNDING_BOXES = Arrays.stream(SHAPES).map(VoxelShape::bounds).toArray(AABB[]::new);
 
-    public MirrorPaneBlock(Properties properties) {
+    public MirrorPaneBlock(final Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(WATERLOGGED, Boolean.FALSE));
     }
 
     @Override
-    public AABB getBoundingBox(BlockState state) {
+    public AABB getBoundingBox(final BlockState state) {
         return BOUNDING_BOXES[state.getValue(FACING).get2DDataValue()];
     }
 
     @Override
-    public float getMirrorOffset(BlockState state) {
+    public float getMirrorOffset(final BlockState state) {
         return 0.125F;
     }
 
     @Override
-    protected FluidState getFluidState(BlockState blockState) {
+    protected FluidState getFluidState(final BlockState blockState) {
         return blockState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(blockState);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-        BlockPos blockPos = blockPlaceContext.getClickedPos();
-        FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPos);
-        Direction face = blockPlaceContext.getClickedFace();
+    public BlockState getStateForPlacement(final BlockPlaceContext blockPlaceContext) {
+        final BlockPos blockPos = blockPlaceContext.getClickedPos();
+        final FluidState fluidState = blockPlaceContext.getLevel().getFluidState(blockPos);
+        final Direction face = blockPlaceContext.getClickedFace();
         return this.defaultBlockState()
                 .setValue(FACING, face.getAxis() == Direction.Axis.Y ? blockPlaceContext.getHorizontalDirection().getOpposite() : face)
                 .setValue(WATERLOGGED, fluidState.getType() == Fluids.WATER);
     }
 
     @Override
-    public BlockState updateShape(BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2) {
+    public BlockState updateShape(final BlockState blockState, final Direction direction, final BlockState blockState2, final LevelAccessor levelAccessor, final BlockPos blockPos, final BlockPos blockPos2) {
         if (blockState.getValue(WATERLOGGED)) {
             levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
         }
@@ -75,27 +75,27 @@ public class MirrorPaneBlock extends AbstractMirrorBlock implements SimpleWaterl
     }
 
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(final BlockPos pos, final BlockState state) {
         return new MirrorBlockEntity(pos, state);
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, BlockGetter blockGetter, BlockPos blockPos, CollisionContext collisionContext) {
+    public VoxelShape getShape(final BlockState state, final BlockGetter blockGetter, final BlockPos blockPos, final CollisionContext collisionContext) {
         return SHAPES[state.getValue(FACING).get2DDataValue()];
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    public boolean propagatesSkylightDown(final BlockState blockState, final BlockGetter blockGetter, final BlockPos blockPos) {
         return blockState.getFluidState().isEmpty();
     }
 
     @Override
-    public float getShadeBrightness(BlockState blockState, BlockGetter blockGetter, BlockPos blockPos) {
+    public float getShadeBrightness(final BlockState blockState, final BlockGetter blockGetter, final BlockPos blockPos) {
         return 1.0F;
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(final StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING, WATERLOGGED);
     }
 }

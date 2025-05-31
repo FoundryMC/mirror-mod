@@ -4,21 +4,21 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.Shapes;
 
-public class MirrorBlock extends AbstractMirrorBlock{
+public class MirrorBlock extends AbstractMirrorBlock {
 
     private static final AABB BOUNDING_BOX = Shapes.block().bounds();
 
-    public MirrorBlock(Properties properties) {
+    public MirrorBlock(final Properties properties) {
         super(properties);
     }
 
     @Override
-    public AABB getBoundingBox(BlockState state) {
+    public AABB getBoundingBox(final BlockState state) {
         return BOUNDING_BOX;
     }
 
     @Override
-    public float getMirrorOffset(BlockState state) {
+    public float getMirrorOffset(final BlockState state) {
         return 0;
     }
 }

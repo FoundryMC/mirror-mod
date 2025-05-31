@@ -21,7 +21,6 @@ public class MirrorModFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         MirrorModClient.initClient();
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> client.execute(MirrorRenderer::free));
-        ClientTickEvents.END_WORLD_TICK.register(level -> MirrorRenderer.endClientTick());
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(entries -> {
             entries.addAfter(Items.BEACON, new ItemStack(MirrorBlocks.MIRROR_PANE.get()));
         });

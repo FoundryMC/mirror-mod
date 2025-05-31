@@ -16,12 +16,9 @@ dependencies {
     // Allows sodium compat to compile properly
     runtimeOnly "org.sinytra.forgified-fabric-api:forgified-fabric-api:0.107.0+2.0.25+1.21.1"
 
-    jarJar(implementation("foundry.veil:veil-neoforge-${project.minecraft_version}")) {
+    implementation("foundry.veil:veil-neoforge-${project.minecraft_version}:${project.veil_version}") {
         exclude group: "maven.modrinth"
-        version {
-            strictly "[${project.veil_version},)"
-            prefer "${project.veil_version}"
-        }
+        exclude group: "me.fallenbreath"
     }
 }
 

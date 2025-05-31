@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 
 import java.util.function.Supplier;
 
-public class MirrorBlocks {
+public final class MirrorBlocks {
 
     public static final RegistrationProvider<Block> BLOCK_REGISTRY = RegistrationProvider.get(BuiltInRegistries.BLOCK, MirrorMod.MOD_ID);
     public static final RegistrationProvider<BlockEntityType<?>> BLOCK_ENTITY_REGISTRY = RegistrationProvider.get(BuiltInRegistries.BLOCK_ENTITY_TYPE, MirrorMod.MOD_ID);
@@ -32,20 +32,23 @@ public class MirrorBlocks {
             new Item.Properties());
     public static final RegistryObject<BlockEntityType<MirrorBlockEntity>> MIRROR_BE = registerBlockEntity("mirror", () -> BlockEntityType.Builder.of(MirrorBlockEntity::new, MIRROR_PANE.get(), MIRROR.get()));
 
+    private MirrorBlocks() {
+    }
+
     public static void bootstrap() {
     }
 
-    public static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block, Item.Properties properties) {
-        RegistryObject<T> object = register(name, block);
+    public static <T extends Block> RegistryObject<T> register(final String name, final Supplier<T> block, final Item.Properties properties) {
+        final RegistryObject<T> object = register(name, block);
         MirrorItems.register(name, () -> new BlockItem(object.get(), properties));
         return object;
     }
 
-    public static <T extends Block> RegistryObject<T> register(String name, Supplier<T> block) {
+    public static <T extends Block> RegistryObject<T> register(final String name, final Supplier<T> block) {
         return BLOCK_REGISTRY.register(name, block);
     }
 
-    public static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> registerBlockEntity(String name, Supplier<BlockEntityType.Builder<T>> builder) {
+    public static <T extends BlockEntity> RegistryObject<BlockEntityType<T>> registerBlockEntity(final String name, final Supplier<BlockEntityType.Builder<T>> builder) {
         return BLOCK_ENTITY_REGISTRY.register(name, () -> builder.get().build(null));
     }
 }

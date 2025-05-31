@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 public class LevelRendererMixin {
 
     @ModifyArg(method = "renderLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/Camera;ZLjava/lang/Runnable;)V"), index = 1)
-    public Matrix4f modifyProjection(Matrix4f matrix) {
+    public Matrix4f modifyProjection(final Matrix4f matrix) {
         return MirrorRenderer.isRenderingMirror() ? MirrorRenderer.getRenderProjection() : matrix;
     }
 }
