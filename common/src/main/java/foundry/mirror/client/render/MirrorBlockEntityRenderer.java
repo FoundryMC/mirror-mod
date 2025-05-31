@@ -8,7 +8,6 @@ import foundry.mirror.blockentity.MirrorBlockEntity;
 import foundry.mirror.registry.MirrorBlocks;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
-import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -62,14 +61,9 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
             }
 
             final MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, mirrorOffset);
-            final MirrorRenderer.MirrorTexture renderMirror = MirrorRenderer.getRenderMirror();
-            if (mirror == renderMirror) {
-                return;
-            }
+            mirror.setRenderedPos(pos, true);
 
-            mirror.setRenderedPos(pos);
-
-            final RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture());
+            final RenderType renderType = mirror.getRenderType();
             if (renderType == null) {
                 return;
             }
@@ -105,12 +99,12 @@ public class MirrorBlockEntityRenderer implements BlockEntityRenderer<MirrorBloc
                 }
 
                 final MirrorRenderer.MirrorTexture mirror = MirrorRenderer.getTexture(pos, facing, 1);
-                final RenderType renderType = VeilRenderType.get(MirrorRenderer.MIRROR_RENDER_TYPE, mirror.getTexture());
+                mirror.setRenderedPos(pos, true);
+
+                final RenderType renderType = mirror.getRenderType();
                 if (renderType == null) {
                     return;
                 }
-
-                mirror.setRenderedPos(pos);
 
                 poseStack.pushPose();
                 poseStack.translate(0.5, 0.5, 0.5);

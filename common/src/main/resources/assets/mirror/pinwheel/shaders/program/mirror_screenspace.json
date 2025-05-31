@@ -1,0 +1,14 @@
+{
+  "vertex": "mirror:mirror",
+  "fragment": "mirror:mirror_screenspace",
+  "textures": {
+    "DiffuseSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main"
+    },
+    "DiffuseDepthSampler": {
+      "type": "framebuffer",
+      "name": "minecraft:main:depth"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "format": "POSITION_TEX_COLOR_NORMAL",
+  "mode": "QUADS",
+  "bufferSize": "TRANSIENT",
+  "sort": false,
+  "affectsCrumbling": true,
+  "outline": true,
+  "layers": [
+    [
+      {
+        "type": "minecraft:write_mask",
+        "color": false
+      },
+      {
+        "type": "veil:shader",
+        "name": "mirror:mirror_screenspace_prepass"
+      },
+      {
+        "type": "minecraft:layering",
+        "mode": "polygon_offset"
+      }
+    ],
+    [
+      {
+        "type": "minecraft:write_mask",
+        "depth": false
+      },
+      {
+        "type": "veil:shader",
+        "name": "mirror:mirror_screenspace"
+      },
+      {
+        "type": "minecraft:lightmap"
+      },
+      {
+        "type": "minecraft:layering",
+        "mode": "polygon_offset"
+      },
+      {
+        "type": "minecraft:transparency",
+        "mode": "translucent"
+      },
+      {
+        "type": "minecraft:depth_test",
+        "mode": "equal"
+      }
+    ]
+  ]
+}

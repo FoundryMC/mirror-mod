@@ -7,6 +7,10 @@
   "outline": true,
   "layers": [
     {
+      "type": "minecraft:write_mask",
+      "depth": false
+    },
+    {
       "type": "minecraft:texture",
       "texture": "%s"
     },

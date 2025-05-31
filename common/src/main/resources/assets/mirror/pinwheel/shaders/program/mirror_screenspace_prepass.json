@@ -1,0 +1,4 @@
+{
+  "vertex": "mirror:mirror_screenspace_prepass",
+  "fragment": "mirror:mirror_screenspace_prepass"
+}

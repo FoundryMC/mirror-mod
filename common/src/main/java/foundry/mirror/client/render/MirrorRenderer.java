@@ -11,9 +11,9 @@ import foundry.veil.api.client.imgui.VeilImGuiUtil;
 import foundry.veil.api.client.render.VeilLevelPerspectiveRenderer;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.framebuffer.AdvancedFbo;
+import foundry.veil.api.client.render.rendertype.VeilRenderType;
 import foundry.veil.api.compat.IrisCompat;
 import imgui.ImGui;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
@@ -24,6 +24,7 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,6 +52,7 @@ public final class MirrorRenderer {
     public static final int MIPMAP_LEVELS = 4;
 
     public static final ResourceLocation MIRROR_RENDER_TYPE = MirrorMod.path("mirror");
+    public static final ResourceLocation SCREEN_SPACE_MIRROR_RENDER_TYPE = MirrorMod.path("mirror_screenspace");
     public static final ResourceLocation MIRROR_FBO = MirrorMod.path("mirror");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MirrorRenderer.class);
@@ -205,7 +207,9 @@ public final class MirrorRenderer {
         final Vector3f look = camera.getLookVector();
 
         for (final MirrorTexture texture : TEXTURES.values()) {
-            renderMirror(texture, cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorRenderer.RENDER_DISTANCE, deltaTracker);
+            if (!texture.isScreenSpace()) {
+                renderMirror(texture, cameraPos.x, cameraPos.y, cameraPos.z, up, look, MirrorRenderer.RENDER_DISTANCE, deltaTracker);
+            }
         }
     }
 
@@ -264,6 +268,7 @@ public final class MirrorRenderer {
 
         private int width;
         private int height;
+        private boolean screenSpace;
 
         private MirrorTexture() {
             this.positions = new ObjectArraySet<>();
@@ -272,6 +277,7 @@ public final class MirrorRenderer {
             this.mirrorOffset = 0;
             this.width = -1;
             this.height = -1;
+            this.screenSpace = false;
 
             this.texture = new TextureWrapper(glGenTextures());
             this.texture.setFilter(false, true);
@@ -328,12 +334,27 @@ public final class MirrorRenderer {
             return this.mirrorOffset;
         }
 
-        public void setRenderedPos(final BlockPos pos) {
+        public @Nullable RenderType getRenderType() {
+            // TODO screen space
+            if (false && this.screenSpace) {
+                return VeilRenderType.get(SCREEN_SPACE_MIRROR_RENDER_TYPE);
+            } else {
+                return VeilRenderType.get(MIRROR_RENDER_TYPE, this.texture.name);
+            }
+        }
+
+        public void setRenderedPos(final BlockPos pos, final boolean screenSpace) {
             this.positions.add(pos);
+            this.screenSpace |= screenSpace;
         }
 
         public void reset() {
             this.positions.clear();
+            this.screenSpace = false;
+        }
+
+        public boolean isScreenSpace() {
+            return this.screenSpace;
         }
     }
 
